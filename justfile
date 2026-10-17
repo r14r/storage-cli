@@ -3,6 +3,7 @@ default:
     @just --list
 bootstrap:
     go mod download
+    just fmt
     git config --local core.hooksPath .githooks
 fmt:
     gofmt -w cmd internal
@@ -18,7 +19,7 @@ precommit: fmt-check vet test
 pre-commit: precommit
 check: precommit
 ci: check
-build: check
+build: fmt check
     mkdir -p dist
     go build -trimpath -ldflags "-s -w" -o dist/storage-cli ./cmd/storage-cli
 install: build
