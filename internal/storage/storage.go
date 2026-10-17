@@ -14,7 +14,7 @@ import (
  "strings"
  "time"
 )
-const Version = "0.1.0"
+const Version = "0.2.0"
 type File struct { Path string `json:"path"`; Size int64 `json:"size"` }
 type Target struct { Name string; Path string; Deletable bool }
 func targets() []Target {
@@ -62,13 +62,16 @@ func Run(args []string,w io.Writer)error{
  if len(args)==0 {args=[]string{"help"}}
  switch args[0] {
  case "help","-h","--help":
-  fmt.Fprintln(w,"storage-cli",Version,"\nCommands: disks [--apfs], largest, folders, targets, cleanup, version\nUse --help after a command for options.");return nil
+  return help(w, append([]string{}, args[1:]...))
  case "version","--version":fmt.Fprintln(w,Version);return nil
  case "disks":
+  if len(args)>1 && (args[1]=="--help" || args[1]=="-h") {return help(w,[]string{"disks"})}
   fs:=flag.NewFlagSet("disks",flag.ContinueOnError);path:=fs.String("path","/","filesystem path");apfs:=fs.Bool("apfs",false,"APFS container report");if e:=fs.Parse(args[1:]);e!=nil{return e}
   if *apfs {if runtime.GOOS!="darwin"{return errors.New("APFS is macOS-only")};out,e:=exec.Command("diskutil","apfs","list").CombinedOutput();fmt.Fprint(w,string(out));return e}
   return usage(w,*path)
  case "largest","folders":
+  if len(args)>1 && (args[1]=="--help" || args[1]=="-h") {return help(w,[]string{args[0]})}
+  if args[0]=="folders" {return runFolders(args[1:],w)}
   fs:=flag.NewFlagSet(args[0],flag.ContinueOnError);path:=fs.String("path",".","scan root");limit:=fs.Int("limit",25,"max entries");min:=fs.Int64("min-mb",1,"minimum size MiB (largest)");jsonOut:=fs.Bool("json",false,"JSON output");if e:=fs.Parse(args[1:]);e!=nil{return e}
   if *min<0{return errors.New("--min-mb must be non-negative")}
   if args[0]=="largest" {
@@ -84,6 +87,7 @@ func Run(args []string,w io.Writer)error{
  case "targets":
   for _,t:=range targets(){status:="report-only";if t.Deletable{status="eligible for explicit cleanup"};fmt.Fprintf(w,"%-15s %-30s %s\n",t.Name,status,t.Path)};return nil
  case "cleanup":
+  if len(args)>1 && (args[1]=="--help" || args[1]=="-h") {return help(w,[]string{"cleanup"})}
   fs:=flag.NewFlagSet("cleanup",flag.ContinueOnError);category:=fs.String("category","all","app-cache|homebrew|system-cache|system-temp|all");days:=fs.Int("older-than",7,"minimum file age in days");limit:=fs.Int("limit",40,"preview maximum");deleteFiles:=fs.Bool("delete",false,"delete eligible files");yes:=fs.Bool("yes",false,"explicit deletion confirmation");jsonOut:=fs.Bool("json",false,"JSON preview");if e:=fs.Parse(args[1:]);e!=nil{return e}
   if *days<0||*limit<1{return errors.New("invalid age or limit")}
   if *deleteFiles&&(!*yes||*category=="all"){return errors.New("deletion requires --yes and an explicit category")}
