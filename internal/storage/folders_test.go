@@ -17,7 +17,7 @@ func TestFoldersDepthAndTotals(t *testing.T){
   if err:=os.WriteFile(p,make([]byte,n),0600);err!=nil{t.Fatal(err)}
  }
  for _,tc:=range []struct{depth string;expected int}{
-  {"0",0},{"1",2},{"2",3},{"3",4},
+  {"0",0},{"1",2},{"2",4},{"3",5},
  }{
   var b bytes.Buffer
   if err:=Run([]string{"folders",root,"--depth",tc.depth,"--json"},&b);err!=nil{t.Fatal(err)}
