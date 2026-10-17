@@ -34,3 +34,15 @@ Deletion is disabled by default. Explicit category, --delete and --yes are requi
 `just bootstrap`, `just fmt`, `just precommit`, `just build`, `just test`, `just release`, `just install`.
 
 `update-cli.yaml` follows the schema-v2 update-cli workflow conventions.
+
+## Detailed help and recursive folder sizes (v0.2.0)
+
+```sh
+storage-cli help
+storage-cli help folders
+storage-cli folders ~/Downloads
+storage-cli folders ~/Downloads --depth 2
+storage-cli folders /System/Volumes/Data --depth 3 --json
+```
+
+`--depth 1` displays the direct children of the selected folder, including files and directories. Larger values additionally display nested descendants. Each directory reports its complete recursive size, independent of display depth. `--limit 0` shows all rows.
