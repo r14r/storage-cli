@@ -4,6 +4,7 @@ default:
 bootstrap:
     go mod download
     just fmt
+    chmod +x .githooks/pre-commit
     git config --local core.hooksPath .githooks
 fmt:
     gofmt -w cmd internal
