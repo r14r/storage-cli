@@ -1,0 +1,71 @@
+schemaVersion: 2
+project:
+  slug: storage-cli
+  name: Storage CLI
+  description: Disk space inspection and cautious cache cleanup
+update:
+  mode: pull
+  source:
+    type: repository
+    repository: https://github.com/r14r/storage-cli.git
+    ref: main
+  releaseDir: release
+  currentDir: current
+  backup:
+    directory: backup
+    keep: 3
+  retention:
+    releases: 5
+  sync:
+    preserve:
+      - .git/
+      - .gitignore
+    keepOnSetupError: false
+  healthcheck:
+    type: none
+defaults:
+  timeout: 15m
+  failFast: true
+requirements:
+  commands: [go, git, just]
+workflows:
+  bootstrap:
+    tasks: [bootstrap]
+  setup:
+    tasks: [install]
+  ci:
+    tasks: [verify]
+  build:
+    tasks: [build]
+tasks:
+  bootstrap:
+    steps:
+      - id: bootstrap
+        name: Initialize Go dependencies and hooks
+        shell: just bootstrap
+  check:
+    steps:
+      - id: format
+        name: Format Go sources
+        shell: just fmt
+      - id: precommit
+        name: Lint and test
+        shell: just precommit
+  build:
+    requires: [check]
+    steps:
+      - id: build
+        name: Compile binary
+        shell: just build
+  verify:
+    requires: [build]
+    steps:
+      - id: verify
+        name: Smoke-test CLI
+        shell: ./dist/storage-cli version && ./dist/storage-cli --help
+  install:
+    requires: [verify]
+    steps:
+      - id: install
+        name: Install binary
+        shell: just install

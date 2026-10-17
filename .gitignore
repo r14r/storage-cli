@@ -1,5 +1,0 @@
-dist/
-.venv/
-.DS_Store
-storage-cli
-coverage.out
