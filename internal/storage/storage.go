@@ -14,7 +14,7 @@ import (
  "strings"
  "time"
 )
-const Version = "0.1.0"
+const Version = "0.2.0"
 type File struct { Path string `json:"path"`; Size int64 `json:"size"` }
 type Target struct { Name string; Path string; Deletable bool }
 func targets() []Target {
